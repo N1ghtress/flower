@@ -1,14 +1,23 @@
-package dragonfly;
+package dragonfly.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.Observable;
 import java.util.Observer;
 
-public class TileSwingView extends JPanel implements Observer {
+import javax.swing.JPanel;
+
+import dragonfly.core.Tile;
+import dragonfly.core.TileType;
+import dragonfly.core.TileView;
+
+public class TileSwingView extends JPanel implements TileView, Observer {
     public final static int INITIAL_WIDTH = 80;
     public final static int INITIAL_HEIGHT = 80;
-
     public final static float HUE_INCREMENT = 0.15f;
 
     public final static Color[] COLORS = {
@@ -19,23 +28,27 @@ public class TileSwingView extends JPanel implements Observer {
             Color.getHSBColor(HUE_INCREMENT * 3, 1.0f, 1.0f),
             Color.getHSBColor(HUE_INCREMENT * 4, 1.0f, 1.0f) };
 
-    public BasicStroke gridStroke;
-    public BasicStroke pathStroke;
-    private Tile tile;
+    private BasicStroke gridStroke;
+    private BasicStroke pathStroke;
+    private Tile model;
 
-    public TileSwingView(Tile tile) {
-        this.tile = tile;
+    public Tile getModel() {
+        return model;
+    }
+
+    public TileSwingView(Tile model) {
+        this.model = model;
         this.setPreferredSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
-        tile.addObserver(this);
+        this.model.addObserver(this);
     }
 
     @Override
     public void update(Observable arg0, Object arg1) {
-        repaint();
+        this.repaint();
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paint(Graphics g) {
         gridStroke = new BasicStroke((int) (getWidth() * 0.04));
         pathStroke = new BasicStroke((int) (getWidth() * 0.4), BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
 
@@ -51,12 +64,12 @@ public class TileSwingView extends JPanel implements Observer {
         g.setColor(COLORS[0]);
         g.drawRect(0, 0, width, height);
 
-        TileType colorType = tile.hasPath() ? tile.getPath().getFirst().getType() : tile.getType();
+        TileType colorType = model.hasPath() ? model.getPath().getFirst().getType() : model.getType();
 
-        g.setColor(COLORS[colorType.ordinal]);
-        switch (tile.getType()) {
+        g.setColor(COLORS[colorType.getOrdinal()]);
+        switch (model.getType()) {
             case S1, S2, S3, S4, S5 -> {
-                g.setColor(COLORS[tile.getType().ordinal]);
+                g.setColor(COLORS[model.getType().getOrdinal()]);
                 double upLeft = 0.1;
                 double size = 1 - 2 * upLeft;
                 g.fillOval((int) (width * upLeft), (int) (height * upLeft), (int) (width * size),
@@ -123,11 +136,7 @@ public class TileSwingView extends JPanel implements Observer {
         }
     }
 
-    public Tile getTile() {
-        return tile;
-    }
-
-    public String toString() {
-        return this.tile.toString();
+    public Tile getmodel() {
+        return model;
     }
 }

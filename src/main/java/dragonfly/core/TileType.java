@@ -1,4 +1,4 @@
-package dragonfly;
+package dragonfly.core;
 
 public enum TileType {
     EMPTY(0, true),
@@ -18,8 +18,12 @@ public enum TileType {
     RIGHT_TO_TOP(0, false),
     RIGHT_TO_BOTTOM(0, false);
 
-    int ordinal = -1;
+    private int ordinal = -1;
     private boolean entrable = false;
+
+    public int getOrdinal() {
+        return ordinal;
+    }
 
     TileType(int ordinal, boolean entrable) {
         this.ordinal = ordinal;
