@@ -132,6 +132,8 @@ public class FlowGame {
         Tile tile = path.getLast();
         if (path.size() > 1)
             path.get(path.size() - 2).setFollowPath(tile);
+        else
+            tile.resetPath();
     }
 
     public void addToPath(Tile tile) {
