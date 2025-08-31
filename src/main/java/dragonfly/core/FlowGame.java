@@ -107,10 +107,7 @@ public class FlowGame {
         if (tile.hasPath()) {
             List<Tile> path = tile.getGamePath();
             paths.remove(path);
-            path.stream().forEach(t -> {
-                if (!t.isSymbol())
-                    t.setPath(Path.EMPTY);
-            });
+            path.stream().forEach(t -> t.resetPath());
         }
 
         if (tile.isSymbol()) {
@@ -162,11 +159,7 @@ public class FlowGame {
     }
 
     public void resetPath() {
-        for (Tile tile : path) {
-            if (!tile.isSymbol())
-                tile.setPath(Path.EMPTY);
-        }
-
+        path.stream().forEach(t -> t.resetPath());
         this.path = new ArrayList<>();
     }
 

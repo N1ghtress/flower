@@ -67,25 +67,35 @@ public class Tile extends Observable {
         }
     }
 
+    public void resetPath() {
+        if (isSymbol())
+            setPath(Path.SYMBOL);
+        else
+            setPath(Path.EMPTY);
+    }
+
     public boolean isEntrable(Tile other) {
         return (type == Type.SYMBOL && value == other.getValue() && this != other) || path == Path.EMPTY;
     }
 
     public void setFollowPath(Tile follower) {
-        Path followerPath;
+        Path direction;
         int dx = getX() - follower.getX();
         int dy = getY() - follower.getY();
         // Follower path must be TOP, BOTTOM, LEFT, RIGHT or SYMBOL
-        followerPath = dx == 0
+        direction = dx == 0
                 ? dy == -1 ? Path.TOP : Path.BOTTOM
                 : dx == -1 ? Path.LEFT : Path.RIGHT;
-        if (follower.getType() != Type.SYMBOL)
-            follower.setPath(followerPath);
+        Path followerPath = direction;
+        if (follower.getPath() == Path.SYMBOL) {
+            followerPath = Path.combine(Path.SYMBOL, direction.opposite());
+        }
+        follower.setPath(followerPath);
 
         // Should only occur in case of forward
-        if (type != Type.SYMBOL && !path.isComplete()) {
+        if (!path.isComplete()) {
             Path followeePath;
-            followeePath = Path.combine(getPath(), followerPath);
+            followeePath = Path.combine(getPath(), direction);
 
             setPath(followeePath);
         }

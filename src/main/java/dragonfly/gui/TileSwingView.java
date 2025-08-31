@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -65,71 +66,82 @@ public class TileSwingView extends JPanel implements TileView, Observer {
 
         int index = model.hasPath() ? model.getGamePath().get(0).getValue() : 0;
         g.setColor(COLORS[index]);
+        g2d.setStroke(pathStroke);
         switch (model.getPath()) {
             case SYMBOL -> {
-                g.setColor(COLORS[model.getValue()]);
-                double upLeft = 0.1;
-                double size = 1 - 2 * upLeft;
-                g.fillOval((int) (width * upLeft), (int) (height * upLeft), (int) (width * size),
-                        (int) (height * size));
+                drawSymbol(g, width, height);
+            }
+            case SYMBOL_LEFT -> {
+                drawSymbol(g, width, height);
+                g.drawLine(0, height / 2, width / 2, height / 2);
+            }
+            case SYMBOL_RIGHT -> {
+                drawSymbol(g, width, height);
+                g.drawLine(width, height / 2, width / 2, height / 2);
+            }
+            case SYMBOL_TOP -> {
+                drawSymbol(g, width, height);
+                g.drawLine(width / 2, 0, width / 2, height / 2);
+            }
+            case SYMBOL_BOTTOM -> {
+                drawSymbol(g, width, height);
+                g.drawLine(width / 2, height, width / 2, height / 2);
+            }
+            case LEFT -> {
+                g.drawLine(0, height / 2, width / 2, height / 2);
+                break;
+            }
+            case RIGHT -> {
+                g.drawLine(width / 2, height / 2, width, height / 2);
+                break;
+            }
+            case TOP -> {
+                g.drawLine(width / 2, height / 2, width / 2, 0);
+                break;
+            }
+            case BOTTOM -> {
+                g.drawLine(width / 2, height / 2, width / 2, height);
+                break;
+            }
+            case VERTICAL -> {
+                g.drawLine(width / 2, height, width / 2, 0);
+                break;
+            }
+            case HORIZONTAL -> {
+                g.drawLine(0, height / 2, width, height / 2);
+                break;
             }
             case LEFT_TO_TOP -> {
-                g2d.setStroke(pathStroke);
                 g.drawLine(0, height / 2, width / 2, height / 2);
                 g.drawLine(width / 2, height / 2, width / 2, 0);
                 break;
             }
             case LEFT_TO_BOTTOM -> {
-                g2d.setStroke(pathStroke);
                 g.drawLine(0, height / 2, width / 2, height / 2);
                 g.drawLine(width / 2, height / 2, width / 2, height);
                 break;
             }
             case RIGHT_TO_TOP -> {
-                g2d.setStroke(pathStroke);
                 g.drawLine(width / 2, height / 2, width, height / 2);
                 g.drawLine(width / 2, height / 2, width / 2, 0);
                 break;
             }
             case RIGHT_TO_BOTTOM -> {
-                g2d.setStroke(pathStroke);
                 g.drawLine(width / 2, height / 2, width, height / 2);
                 g.drawLine(width / 2, height / 2, width / 2, height);
-                break;
-            }
-            case LEFT -> {
-                g2d.setStroke(pathStroke);
-                g.drawLine(0, height / 2, width / 2, height / 2);
-                break;
-            }
-            case RIGHT -> {
-                g2d.setStroke(pathStroke);
-                g.drawLine(width / 2, height / 2, width, height / 2);
-                break;
-            }
-            case TOP -> {
-                g2d.setStroke(pathStroke);
-                g.drawLine(width / 2, height / 2, width / 2, 0);
-                break;
-            }
-            case BOTTOM -> {
-                g2d.setStroke(pathStroke);
-                g.drawLine(width / 2, height / 2, width / 2, height);
-                break;
-            }
-            case VERTICAL -> {
-                g2d.setStroke(pathStroke);
-                g.drawLine(width / 2, height, width / 2, 0);
-                break;
-            }
-            case HORIZONTAL -> {
-                g2d.setStroke(pathStroke);
-                g.drawLine(0, height / 2, width, height / 2);
                 break;
             }
             default -> {
             }
         }
+    }
+
+    private void drawSymbol(Graphics g, int width, int height) {
+        g.setColor(COLORS[model.getValue()]);
+        double upLeft = 0.1;
+        double size = 1 - 2 * upLeft;
+        g.fillOval((int) (width * upLeft), (int) (height * upLeft), (int) (width * size),
+                (int) (height * size));
     }
 
     public Tile getmodel() {
