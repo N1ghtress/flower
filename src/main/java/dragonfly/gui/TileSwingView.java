@@ -117,16 +117,14 @@ public class TileSwingView extends JPanel implements TileView, Observer {
                 g.drawLine(width / 2, height / 2, width / 2, height);
                 break;
             }
-            case HORIZONTAL -> {
-                g2d.setStroke(pathStroke);
-                g.drawLine(width / 2, height / 2, width / 2, 0);
-                g.drawLine(width / 2, height / 2, width / 2, height);
-                break;
-            }
             case VERTICAL -> {
                 g2d.setStroke(pathStroke);
-                g.drawLine(width / 2, height / 2, width, height / 2);
-                g.drawLine(0, height / 2, width / 2, height / 2);
+                g.drawLine(width / 2, height, width / 2, 0);
+                break;
+            }
+            case HORIZONTAL -> {
+                g2d.setStroke(pathStroke);
+                g.drawLine(0, height / 2, width, height / 2);
                 break;
             }
             default -> {

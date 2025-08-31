@@ -71,68 +71,24 @@ public class Tile extends Observable {
         return (type == Type.SYMBOL && value == other.getValue() && this != other) || path == Path.EMPTY;
     }
 
-    public static void setFollowingType(Tile followee, Tile follower) {
-        Path followeeType;
-        Path followerType;
+    public void setFollowPath(Tile follower) {
+        Path followerPath;
+        int dx = getX() - follower.getX();
+        int dy = getY() - follower.getY();
+        // Follower path must be TOP, BOTTOM, LEFT, RIGHT or SYMBOL
+        followerPath = dx == 0
+                ? dy == -1 ? Path.TOP : Path.BOTTOM
+                : dx == -1 ? Path.LEFT : Path.RIGHT;
+        if (follower.getType() != Type.SYMBOL)
+            follower.setPath(followerPath);
 
-        int dx = followee.getX() - follower.getX();
-        int dy = followee.getY() - follower.getY();
+        // Should only occur in case of forward
+        if (type != Type.SYMBOL && !path.isComplete()) {
+            Path followeePath;
+            followeePath = Path.combine(getPath(), followerPath);
 
-        followerType = dx == 0
-                ? dy == 1 ? Path.TOP : Path.BOTTOM
-                : dx == 1 ? Path.LEFT : Path.RIGHT;
-
-        // TODO: Determine followeeType
-        follower.setPath(followerType);
-        followee.setPath(Path.EMPTY);
-    }
-
-    public Path getCurrentType() {
-        if (this.isSymbol())
-            return this.path;
-
-        List<Tile> path = this.getGamePath();
-        Tile previousTile = path.get(path.size() - 2);
-
-        int deltaX = this.getX() - previousTile.getX();
-        int deltaY = this.getY() - previousTile.getY();
-
-        return deltaX == 0
-                ? deltaY == 1 ? Path.TOP : Path.BOTTOM
-                : deltaX == 1 ? Path.LEFT : Path.RIGHT;
-    }
-
-    public Path getPreviousType() {
-        List<Tile> path = this.getGamePath();
-        Tile prev = path.get(path.size() - 2);
-        Path prevType = prev.path;
-
-        if (prev.isSymbol())
-            return prevType;
-
-        Tile befPrev = path.get(path.size() - 3);
-
-        int deltaX = this.getX() - prev.getX();
-        int deltaY = this.getY() - prev.getY();
-
-        if (deltaX == 0)
-            prevType = Path.HORIZONTAL;
-        if (deltaY == 0)
-            prevType = Path.VERTICAL;
-
-        int prevDeltaX = prev.getX() - befPrev.getX();
-        int prevDeltaY = prev.getY() - befPrev.getY();
-
-        if ((deltaX == -1 && prevDeltaY == -1) || (deltaY == 1 && prevDeltaX == 1))
-            prevType = Path.LEFT_TO_BOTTOM;
-        else if ((deltaX == -1 && prevDeltaY == 1) || (deltaY == -1 && prevDeltaX == 1))
-            prevType = Path.LEFT_TO_TOP;
-        else if ((deltaX == 1 && prevDeltaY == -1) || (deltaY == 1 && prevDeltaX == -1))
-            prevType = Path.RIGHT_TO_BOTTOM;
-        else if ((deltaX == 1 && prevDeltaY == 1) || (deltaY == -1 && prevDeltaX == -1))
-            prevType = Path.RIGHT_TO_TOP;
-
-        return prevType;
+            setPath(followeePath);
+        }
     }
 
     public boolean hasPath() {
@@ -173,6 +129,6 @@ public class Tile extends Observable {
     }
 
     public String toString() {
-        return "(" + x + "," + y + ")";
+        return "(" + x + "," + y + ") " + path;
     }
 }

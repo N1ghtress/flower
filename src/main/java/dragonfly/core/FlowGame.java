@@ -124,8 +124,6 @@ public class FlowGame {
         boolean entrable = cur.isEntrable(path.get(0));
         boolean neighbour = cur.isNeighbourWith(prev);
         boolean noPath = !cur.hasPath();
-        // System.out.println("entrable: " + entrable + ", neighbour: " + neighbour + ",
-        // noPath: " + noPath);
         return entrable && neighbour && noPath;
     }
 
@@ -135,17 +133,15 @@ public class FlowGame {
             path.getLast().setPath(Path.EMPTY);
         path.removeLast();
         Tile tile = path.getLast();
-        tile.setPath(tile.getCurrentType());
+        if (path.size() > 1)
+            path.get(path.size() - 2).setFollowPath(tile);
     }
 
     public void addToPath(Tile tile) {
         this.path.add(tile);
 
-        Tile previousTile = this.path.get(this.path.size() - 2);
-
-        tile.setPath(tile.getCurrentType());
-        previousTile.setPath(tile.getPreviousType());
-
+        Tile prev = this.path.get(this.path.size() - 2);
+        prev.setFollowPath(tile);
         if (tile.isSymbol())
             this.resolvePath(tile);
     }
