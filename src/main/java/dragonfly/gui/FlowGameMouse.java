@@ -8,9 +8,9 @@ import dragonfly.core.FlowGame;
 import dragonfly.core.FlowGameController;
 import dragonfly.core.Tile;
 
-public class FlowGameMouseController extends FlowGameController implements MouseListener {
+public class FlowGameMouse extends FlowGameController implements MouseListener {
 
-    public FlowGameMouseController(FlowGame model, FlowGameGUIView view) {
+    public FlowGameMouse(FlowGame model, FlowGameGUI view) {
         super(model, view);
         for (Container[] containers : view.getViews()) {
             for (Container container : containers) {

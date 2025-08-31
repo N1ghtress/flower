@@ -6,15 +6,24 @@ import java.awt.GridLayout;
 import javax.swing.JFrame;
 
 import dragonfly.core.FlowGame;
+import dragonfly.core.FlowGameView;
 
-public class FlowGameSwingView extends FlowGameGUIView {
+public class FlowGameGUI implements FlowGameView {
     protected final JFrame frame;
 
-    public FlowGameSwingView(FlowGame model) {
-        super(model);
-        this.frame = new JFrame("Flow Game");
+    protected final FlowGame model;
+    protected final Container[][] views;
+
+    public Container[][] getViews() {
+        return views;
+    }
+
+    public FlowGameGUI(FlowGame model) {
+        this.model = model;
         int cols = model.getxSize();
         int rows = model.getySize();
+        this.views = new TileSwingView[rows][cols];
+        this.frame = new JFrame("Flow Game");
 
         Container contentPane = frame.getContentPane();
         contentPane.setLayout(new GridLayout(rows, cols));
