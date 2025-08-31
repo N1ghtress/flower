@@ -8,5 +8,4 @@
 - Add menuing
 
 ### Internal
-- New symbol display to match line leaving it.
 - Remove Observer/Observable
