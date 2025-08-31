@@ -8,6 +8,5 @@
 - Add menuing
 
 ### Internal
-- Remove getCurrentType and getPreviousType from Tile.java.
 - New symbol display to match line leaving it.
 - Remove Observer/Observable
