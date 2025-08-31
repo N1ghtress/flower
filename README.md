@@ -6,6 +6,3 @@
 - Add level generator
 - Add replay after winning
 - Add menuing
-
-### Internal
-- Remove Observer/Observable
