@@ -1,10 +1,13 @@
 package dragonfly.core;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.List;
-import java.util.Observable;
 
-public class Tile extends Observable {
+public class Tile {
     private static int nextSymbolValue = 1;
+
+    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private FlowGame game;
     private int x;
     private int y;
@@ -24,10 +27,10 @@ public class Tile extends Observable {
         return path;
     }
 
-    public void setPath(Path path) {
-        this.path = path;
-        setChanged();
-        notifyObservers();
+    public void setPath(Path p) {
+        Path oldPath = path;
+        path = p;
+        pcs.firePropertyChange("path", oldPath, path);
     }
 
     public Type getType() {
@@ -140,5 +143,13 @@ public class Tile extends Observable {
 
     public String toString() {
         return "(" + x + "," + y + ") " + path;
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        pcs.removePropertyChangeListener(listener);
     }
 }

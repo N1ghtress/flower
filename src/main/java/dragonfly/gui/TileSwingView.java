@@ -6,16 +6,15 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.JPanel;
 
 import dragonfly.core.Tile;
 import dragonfly.core.TileView;
 
-public class TileSwingView extends JPanel implements TileView, Observer {
+public class TileSwingView extends JPanel implements TileView, PropertyChangeListener {
     public final static int INITIAL_WIDTH = 80;
     public final static int INITIAL_HEIGHT = 80;
     public final static float HUE_INCREMENT = 0.15f;
@@ -39,12 +38,12 @@ public class TileSwingView extends JPanel implements TileView, Observer {
     public TileSwingView(Tile model) {
         this.model = model;
         this.setPreferredSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
-        this.model.addObserver(this);
+        this.model.addPropertyChangeListener(this);
     }
 
     @Override
-    public void update(Observable arg0, Object arg1) {
-        this.repaint();
+    public void propertyChange(PropertyChangeEvent evt) {
+        repaint();
     }
 
     @Override
