@@ -12,7 +12,6 @@ import java.util.Observer;
 import javax.swing.JPanel;
 
 import dragonfly.core.Tile;
-import dragonfly.core.TileType;
 import dragonfly.core.TileView;
 
 public class TileSwingView extends JPanel implements TileView, Observer {
@@ -64,12 +63,11 @@ public class TileSwingView extends JPanel implements TileView, Observer {
         g.setColor(COLORS[0]);
         g.drawRect(0, 0, width, height);
 
-        TileType colorType = model.hasPath() ? model.getPath().getFirst().getType() : model.getType();
-
-        g.setColor(COLORS[colorType.getOrdinal()]);
-        switch (model.getType()) {
-            case S1, S2, S3, S4, S5 -> {
-                g.setColor(COLORS[model.getType().getOrdinal()]);
+        int index = model.hasPath() ? model.getGamePath().get(0).getValue() : 0;
+        g.setColor(COLORS[index]);
+        switch (model.getPath()) {
+            case SYMBOL -> {
+                g.setColor(COLORS[model.getValue()]);
                 double upLeft = 0.1;
                 double size = 1 - 2 * upLeft;
                 g.fillOval((int) (width * upLeft), (int) (height * upLeft), (int) (width * size),

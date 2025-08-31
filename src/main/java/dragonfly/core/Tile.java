@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Observable;
 
 public class Tile extends Observable {
+    private static int nextSymbolValue = 1;
     private FlowGame game;
     private int x;
     private int y;
-    private TileType type;
+    private Path path;
+    private Type type;
+    private int value;
 
     public int getX() {
         return x;
@@ -17,58 +20,92 @@ public class Tile extends Observable {
         return y;
     }
 
-    public TileType getType() {
-        return type;
+    public Path getPath() {
+        return path;
     }
 
-    public void setType(TileType type) {
-        this.type = type;
+    public void setPath(Path path) {
+        this.path = path;
         setChanged();
         notifyObservers();
     }
 
-    public Tile(FlowGame game, int x, int y, TileType type) {
+    public Type getType() {
+        return type;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
+    }
+
+    public Tile(FlowGame game, int x, int y, Path path, Type type, int value) {
         this.game = game;
         this.x = x;
         this.y = y;
+        this.path = path;
         this.type = type;
+        this.value = value;
+        if (type == Type.SYMBOL)
+            Tile.nextSymbolValue++;
+    }
+
+    public void changeInto(Type type) {
+        switch (type) {
+            case Type.NORMAL -> {
+                path = Path.EMPTY;
+                type = Type.NORMAL;
+            }
+            case Type.SYMBOL -> {
+                path = Path.SYMBOL;
+                type = Type.SYMBOL;
+                value = ++Tile.nextSymbolValue / 2;
+            }
+        }
+    }
+
+    public boolean isEntrable(Tile other) {
+        return (type == Type.SYMBOL && value == other.getValue() && this != other) || path == Path.EMPTY;
     }
 
     public static void setFollowingType(Tile followee, Tile follower) {
-        TileType followeeType;
-        TileType followerType;
+        Path followeeType;
+        Path followerType;
 
         int dx = followee.getX() - follower.getX();
         int dy = followee.getY() - follower.getY();
 
         followerType = dx == 0
-                ? dy == 1 ? TileType.TOP : TileType.BOTTOM
-                : dx == 1 ? TileType.LEFT : TileType.RIGHT;
+                ? dy == 1 ? Path.TOP : Path.BOTTOM
+                : dx == 1 ? Path.LEFT : Path.RIGHT;
 
         // TODO: Determine followeeType
-        follower.setType(followerType);
-        followee.setType(TileType.EMPTY);
+        follower.setPath(followerType);
+        followee.setPath(Path.EMPTY);
     }
 
-    public TileType getCurrentType() {
+    public Path getCurrentType() {
         if (this.isSymbol())
-            return this.type;
+            return this.path;
 
-        List<Tile> path = this.getPath();
+        List<Tile> path = this.getGamePath();
         Tile previousTile = path.get(path.size() - 2);
 
         int deltaX = this.getX() - previousTile.getX();
         int deltaY = this.getY() - previousTile.getY();
 
         return deltaX == 0
-                ? deltaY == 1 ? TileType.TOP : TileType.BOTTOM
-                : deltaX == 1 ? TileType.LEFT : TileType.RIGHT;
+                ? deltaY == 1 ? Path.TOP : Path.BOTTOM
+                : deltaX == 1 ? Path.LEFT : Path.RIGHT;
     }
 
-    public TileType getPreviousType() {
-        List<Tile> path = this.getPath();
+    public Path getPreviousType() {
+        List<Tile> path = this.getGamePath();
         Tile prev = path.get(path.size() - 2);
-        TileType prevType = prev.type;
+        Path prevType = prev.path;
 
         if (prev.isSymbol())
             return prevType;
@@ -79,21 +116,21 @@ public class Tile extends Observable {
         int deltaY = this.getY() - prev.getY();
 
         if (deltaX == 0)
-            prevType = TileType.HORIZONTAL;
+            prevType = Path.HORIZONTAL;
         if (deltaY == 0)
-            prevType = TileType.VERTICAL;
+            prevType = Path.VERTICAL;
 
         int prevDeltaX = prev.getX() - befPrev.getX();
         int prevDeltaY = prev.getY() - befPrev.getY();
 
         if ((deltaX == -1 && prevDeltaY == -1) || (deltaY == 1 && prevDeltaX == 1))
-            prevType = TileType.LEFT_TO_BOTTOM;
+            prevType = Path.LEFT_TO_BOTTOM;
         else if ((deltaX == -1 && prevDeltaY == 1) || (deltaY == -1 && prevDeltaX == 1))
-            prevType = TileType.LEFT_TO_TOP;
+            prevType = Path.LEFT_TO_TOP;
         else if ((deltaX == 1 && prevDeltaY == -1) || (deltaY == 1 && prevDeltaX == -1))
-            prevType = TileType.RIGHT_TO_BOTTOM;
+            prevType = Path.RIGHT_TO_BOTTOM;
         else if ((deltaX == 1 && prevDeltaY == 1) || (deltaY == -1 && prevDeltaX == -1))
-            prevType = TileType.RIGHT_TO_TOP;
+            prevType = Path.RIGHT_TO_TOP;
 
         return prevType;
     }
@@ -102,7 +139,7 @@ public class Tile extends Observable {
         return game.tilesInPath().contains(this);
     }
 
-    public List<Tile> getPath() {
+    public List<Tile> getGamePath() {
         if (game.getPath().contains(this))
             return game.getPath();
         return game.getPaths()
@@ -113,11 +150,11 @@ public class Tile extends Observable {
     }
 
     public boolean isEmpty() {
-        return this.getType() == TileType.EMPTY;
+        return this.path == Path.EMPTY;
     }
 
     public boolean isSymbol() {
-        return type.isSymbol();
+        return this.type == Type.SYMBOL;
     }
 
     public boolean isNeighbourWith(Tile tile) {

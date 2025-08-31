@@ -47,12 +47,12 @@ public class FlowGame {
 
         for (int x = 0; x < this.ySize; x++) {
             for (int y = 0; y < this.xSize; y++) {
-                this.tiles[y][x] = new Tile(this, x, y, TileType.EMPTY);
+                this.tiles[y][x] = new Tile(this, x, y, Path.EMPTY, Type.NORMAL, 0);
             }
         }
 
-        this.tiles[0][0].setType(TileType.S1);
-        this.tiles[this.ySize - 1][this.xSize - 1].setType(TileType.S1);
+        this.tiles[0][0].changeInto(Type.SYMBOL);
+        this.tiles[this.ySize - 1][this.xSize - 1].changeInto(Type.SYMBOL);
     }
 
     public FlowGame(String filepath) {
@@ -61,7 +61,7 @@ public class FlowGame {
             int cur = 0;
             FileInputStream fis = new FileInputStream(filepath);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-            Map<TileType, Integer> symbols = new HashMap<TileType, Integer>();
+            Map<Integer, Integer> symbols = new HashMap<Integer, Integer>();
 
             read = br.readLine();
             String[] dimensions = read.split("x");
@@ -74,12 +74,14 @@ public class FlowGame {
 
             while ((read = br.readLine()) != null) {
                 for (int i = 0; i < read.length(); i++) {
-                    int index = Character.getNumericValue(read.charAt(i));
-                    TileType type = TileType.values()[index];
-                    tiles[cur][i] = new Tile(this, i, cur, type);
+                    char c = read.charAt(i);
+                    Type type = c == '0' ? Type.NORMAL : Type.SYMBOL;
+                    Path path = type == Type.NORMAL ? Path.EMPTY : Path.SYMBOL;
+                    int value = Character.getNumericValue(c);
+                    tiles[cur][i] = new Tile(this, i, cur, path, type, value);
 
-                    if (type.isSymbol()) {
-                        symbols.merge(type, 1, (v1, v2) -> v1 + v2);
+                    if (type == Type.SYMBOL) {
+                        symbols.merge(tiles[cur][i].getValue(), 1, (v1, v2) -> v1 + v2);
                     }
                 }
 
@@ -103,11 +105,11 @@ public class FlowGame {
 
     public void start(Tile tile) {
         if (tile.hasPath()) {
-            List<Tile> path = tile.getPath();
+            List<Tile> path = tile.getGamePath();
             paths.remove(path);
             path.stream().forEach(t -> {
                 if (!t.isSymbol())
-                    t.setType(TileType.EMPTY);
+                    t.setPath(Path.EMPTY);
             });
         }
 
@@ -119,7 +121,7 @@ public class FlowGame {
     }
 
     public boolean isValidNext(Tile cur, Tile prev) {
-        boolean entrable = cur.getType().isEntrable(path.get(0).getType());
+        boolean entrable = cur.isEntrable(path.get(0));
         boolean neighbour = cur.isNeighbourWith(prev);
         boolean noPath = !cur.hasPath();
         // System.out.println("entrable: " + entrable + ", neighbour: " + neighbour + ",
@@ -130,10 +132,10 @@ public class FlowGame {
     public void removeLast() {
         Tile last = path.getLast();
         if (!last.isSymbol())
-            path.getLast().setType(TileType.EMPTY);
+            path.getLast().setPath(Path.EMPTY);
         path.removeLast();
         Tile tile = path.getLast();
-        tile.setType(tile.getCurrentType());
+        tile.setPath(tile.getCurrentType());
     }
 
     public void addToPath(Tile tile) {
@@ -141,8 +143,8 @@ public class FlowGame {
 
         Tile previousTile = this.path.get(this.path.size() - 2);
 
-        tile.setType(tile.getCurrentType());
-        previousTile.setType(tile.getPreviousType());
+        tile.setPath(tile.getCurrentType());
+        previousTile.setPath(tile.getPreviousType());
 
         if (tile.isSymbol())
             this.resolvePath(tile);
@@ -166,7 +168,7 @@ public class FlowGame {
     public void resetPath() {
         for (Tile tile : path) {
             if (!tile.isSymbol())
-                tile.setType(TileType.EMPTY);
+                tile.setPath(Path.EMPTY);
         }
 
         this.path = new ArrayList<>();
@@ -178,7 +180,7 @@ public class FlowGame {
     }
 
     public void resolvePath(Tile last) {
-        if (last.getType() == path.get(0).getType()) {
+        if (last.getGamePath() == path.get(0).getGamePath()) {
             paths.add(new ArrayList<>());
             this.path = paths.getLast();
         }
