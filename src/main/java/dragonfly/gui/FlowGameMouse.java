@@ -6,7 +6,7 @@ import java.awt.event.MouseListener;
 
 import dragonfly.core.FlowGame;
 import dragonfly.core.FlowGameController;
-import dragonfly.core.Tile;
+import dragonfly.core.FlowGameTile;
 
 public class FlowGameMouse extends FlowGameController implements MouseListener {
 
@@ -21,19 +21,19 @@ public class FlowGameMouse extends FlowGameController implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        Tile clicked = ((TileSwingView) e.getSource()).getModel();
-        model.start(clicked);
+        FlowGameTile clicked = ((TileSwingView) e.getSource()).getModel();
+        start(clicked);
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        Tile entered = ((TileSwingView) e.getSource()).getModel();
-        model.enter(entered);
+        FlowGameTile entered = ((TileSwingView) e.getSource()).getModel();
+        enter(entered);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        model.stop();
+        stop();
     }
 
     @Override
