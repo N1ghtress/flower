@@ -10,11 +10,11 @@ public abstract class FlowGameController {
         this.view = view;
     }
 
-    protected void start(Tile tile) {
+    protected void start(FlowGameTile tile) {
         model.start(tile);
     }
 
-    protected void enter(Tile tile) {
+    protected void enter(FlowGameTile tile) {
         model.enter(tile);
     }
 

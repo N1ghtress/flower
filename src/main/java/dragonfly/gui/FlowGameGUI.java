@@ -20,17 +20,17 @@ public class FlowGameGUI implements FlowGameView {
 
     public FlowGameGUI(FlowGame model) {
         this.model = model;
-        int cols = model.getxSize();
-        int rows = model.getySize();
-        this.views = new TileSwingView[rows][cols];
+        int cols = model.getTiles().getxSize();
+        int rows = model.getTiles().getySize();
+        this.views = new TileGUIView[rows][cols];
         this.frame = new JFrame("Flow Game");
 
         Container contentPane = frame.getContentPane();
         contentPane.setLayout(new GridLayout(rows, cols));
-        for (int x = 0; x < cols; x++) {
-            for (int y = 0; y < rows; y++) {
-                this.views[y][x] = new TileSwingView(this.model.getTile(x, y));
-                contentPane.add(views[y][x]);
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < cols; x++) {
+                this.views[x][y] = new TileGUIView(this.model, this.model.getTiles().getTile(x, y));
+                contentPane.add(views[x][y]);
             }
         }
 

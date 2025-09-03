@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -12,80 +13,52 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 public class FlowGame {
+    private Grid tiles;
+    private List<List<FlowGameTile>> paths;
+    private List<FlowGameTile> path;
 
-    private int xSize;
-    private int ySize;
-    private Tile[][] tiles;
-    private List<Tile> path;
-    private List<List<Tile>> paths;
-
-    public Tile getTile(int x, int y) {
-        return tiles[x][y];
-    }
-
-    public int getxSize() {
-        return xSize;
-    }
-
-    public int getySize() {
-        return ySize;
-    }
-
-    public List<Tile> getPath() {
-        return path;
-    }
-
-    public List<List<Tile>> getPaths() {
-        return paths;
+    public Grid getTiles() {
+        return tiles;
     }
 
     public FlowGame(int xSize, int ySize) {
-        this.xSize = xSize;
-        this.ySize = ySize;
-        this.tiles = new Tile[this.ySize][this.xSize];
+        this.tiles = new QuadGrid(xSize, ySize);
         this.paths = new ArrayList<>();
+        this.paths.add(new ArrayList<>());
+        this.path = paths.getLast();
 
-        for (int x = 0; x < this.ySize; x++) {
-            for (int y = 0; y < this.xSize; y++) {
-                this.tiles[y][x] = new Tile(this, x, y, Path.EMPTY, Type.NORMAL, 0);
-            }
+        for (int i = 0; i < xSize * ySize; i++) {
+            FlowGameTile t = new FlowGameNormalTile(this);
+            this.tiles.add(t);
         }
 
-        this.tiles[0][0].changeInto(Type.SYMBOL);
-        this.tiles[this.ySize - 1][this.xSize - 1].changeInto(Type.SYMBOL);
+        this.tiles.set(0, new FlowGameSymbolTile(this, 1));
+        this.tiles.set(this.tiles.size() - 1, new FlowGameSymbolTile(this, 1));
     }
 
     public FlowGame(String filepath) {
         try {
             String read;
-            int cur = 0;
             FileInputStream fis = new FileInputStream(filepath);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             Map<Integer, Integer> symbols = new HashMap<Integer, Integer>();
 
             read = br.readLine();
             String[] dimensions = read.split("x");
-            this.xSize = Integer.valueOf(dimensions[0]);
-            this.ySize = Integer.valueOf(dimensions[1]);
-            this.tiles = new Tile[ySize][xSize];
+            this.tiles = new QuadGrid(Integer.valueOf(dimensions[0]), Integer.valueOf(dimensions[1]));
             this.paths = new ArrayList<>();
             this.paths.add(new ArrayList<>());
             this.path = paths.getLast();
 
             while ((read = br.readLine()) != null) {
                 for (int i = 0; i < read.length(); i++) {
-                    char c = read.charAt(i);
-                    Type type = c == '0' ? Type.NORMAL : Type.SYMBOL;
-                    Path path = type == Type.NORMAL ? Path.EMPTY : Path.SYMBOL;
-                    int value = Character.getNumericValue(c);
-                    tiles[cur][i] = new Tile(this, i, cur, path, type, value);
-
-                    if (type == Type.SYMBOL) {
-                        symbols.merge(tiles[cur][i].getValue(), 1, (v1, v2) -> v1 + v2);
-                    }
+                    int value = Character.getNumericValue(read.charAt(i));
+                    if (value != 0) {
+                        tiles.add(new FlowGameSymbolTile(this, value));
+                        symbols.merge(value, 1, (v1, v2) -> v1 + v2);
+                    } else
+                        tiles.add(new FlowGameNormalTile(this));
                 }
-
-                cur++;
             }
 
             symbols.values().forEach(i -> {
@@ -103,132 +76,98 @@ public class FlowGame {
         }
     }
 
-    public void start(Tile tile) {
-        if (tile.hasPath()) {
-            List<Tile> path = tile.getGamePath();
+    public boolean hasPath(FlowGameTile t) {
+        return paths.stream()
+                .flatMap(Collection::stream)
+                .anyMatch(e -> e == t);
+    }
+
+    public List<FlowGameTile> getGamePath(FlowGameTile t) {
+        return paths
+                .stream()
+                .filter(e -> e.contains(t))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void start(FlowGameTile t) {
+        if (hasPath(t)) {
+            List<FlowGameTile> path = getGamePath(t);
             paths.remove(path);
-            path.stream().forEach(t -> t.resetPath());
+            path.stream().forEach(e -> e.reset());
         }
 
-        if (tile.isSymbol()) {
-            paths.add(new ArrayList<>());
-            path = paths.getLast();
-            path.add(tile);
+        if (t.isSymbol()) {
+            path.add(t);
         }
     }
 
-    public boolean isValidNext(Tile cur, Tile prev) {
-        boolean entrable = cur.isEntrable(path.get(0));
-        boolean neighbour = cur.isNeighbourWith(prev);
-        boolean noPath = !cur.hasPath();
-        return entrable && neighbour && noPath;
+    public boolean isValidNext(FlowGameTile next, FlowGameTile last) {
+        return next.isEntrable(path.get(0));
     }
 
     public void removeLast() {
-        Tile last = path.getLast();
+        FlowGameTile last = path.getLast();
         if (!last.isSymbol())
             path.getLast().setPath(Path.EMPTY);
         path.removeLast();
-        Tile tile = path.getLast();
+        FlowGameTile tile = path.getLast();
         if (path.size() > 1)
             path.get(path.size() - 2).setFollowPath(tile);
         else
-            tile.resetPath();
+            tile.reset();
     }
 
-    public void addToPath(Tile tile) {
+    public void addToPath(FlowGameTile tile) {
         this.path.add(tile);
+        tile.setValue(path.getFirst().getValue());
 
-        Tile prev = this.path.get(this.path.size() - 2);
+        FlowGameTile prev = this.path.get(this.path.size() - 2);
         prev.setFollowPath(tile);
         if (tile.isSymbol())
-            this.resolvePath(tile);
+            this.resolvePath();
     }
 
-    public void enter(Tile next) {
-        if (hasNoPath())
+    public void enter(FlowGameTile next) {
+        if (path.size() == 0)
             return;
 
-        List<Tile> path = getPath();
-        Tile last = path.getLast();
-        Tile prev = path.size() >= 2 ? path.get(path.size() - 2) : null;
+        FlowGameTile last = path.getLast();
+        FlowGameTile prev = path.size() >= 2 ? path.get(path.size() - 2) : null;
 
         if (next.equals(prev)) {
             removeLast();
-        } else if (isValidNext(next, last)) {
+        } else if (next.isEntrable(last)) {
             addToPath(next);
         }
     }
 
-    public void resetPath() {
-        path.stream().forEach(t -> t.resetPath());
-        this.path = new ArrayList<>();
-    }
-
     public void stop() {
-        if (!hasNoPath())
-            resetPath();
-    }
-
-    public void resolvePath(Tile last) {
-        if (last.getGamePath() == path.get(0).getGamePath()) {
+        if (!(path.size() == 0)) {
+            path.stream().forEach(t -> t.reset());
+            paths.removeLast();
             paths.add(new ArrayList<>());
-            this.path = paths.getLast();
-        }
-        if (this.isFull()) {
-            endGame();
+            path = paths.getLast();
         }
     }
 
-    public boolean hasNoPath() {
-        return this.path.size() == 0;
+    public void resolvePath() {
+        paths.add(new ArrayList<>());
+        path = paths.getLast();
+        if (this.isFull())
+            endGame();
     }
 
     public boolean isFull() {
-        boolean isWon = true;
-
-        for (Tile[] tiles : this.tiles) {
-            if (!isWon)
-                break;
-
-            for (Tile tile : tiles) {
-                if (!tile.hasPath()) {
-                    isWon = false;
-                    break;
-                }
-            }
-        }
-
-        return isWon;
+        return paths.stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList())
+                .size() == this.tiles.size();
     }
 
+    // TODO: This doesn't follow MVC at all, fix !
     public void endGame() {
         System.out.println("Congratz, you won !");
         System.exit(0);
-    }
-
-    public List<Tile> tilesInPath() {
-        List<Tile> tiles = paths
-                .stream()
-                .flatMap(e -> e.stream())
-                .collect(Collectors.toList());
-        return tiles;
-    }
-
-    @Override
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        sb.append("GridModel :\nSize: ");
-        sb.append(this.xSize);
-        sb.append("\n");
-        for (int x = 0; x < this.xSize; x++) {
-            for (int y = 0; y < this.xSize; y++) {
-                sb.append(this.tiles[x][y]);
-            }
-            sb.append("\n");
-        }
-
-        return sb.toString();
     }
 }

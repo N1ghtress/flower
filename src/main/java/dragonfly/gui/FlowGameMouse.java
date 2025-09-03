@@ -21,13 +21,13 @@ public class FlowGameMouse extends FlowGameController implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        FlowGameTile clicked = ((TileSwingView) e.getSource()).getModel();
+        FlowGameTile clicked = ((TileGUIView) e.getSource()).getModel();
         start(clicked);
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        FlowGameTile entered = ((TileSwingView) e.getSource()).getModel();
+        FlowGameTile entered = ((TileGUIView) e.getSource()).getModel();
         enter(entered);
     }
 

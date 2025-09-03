@@ -8,13 +8,15 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import javax.swing.JPanel;
 
-import dragonfly.core.Tile;
+import dragonfly.core.FlowGame;
+import dragonfly.core.FlowGameTile;
 import dragonfly.core.TileView;
 
-public class TileSwingView extends JPanel implements TileView, PropertyChangeListener {
+public class TileGUIView extends JPanel implements TileView, PropertyChangeListener {
     public final static int INITIAL_WIDTH = 80;
     public final static int INITIAL_HEIGHT = 80;
     public final static float HUE_INCREMENT = 0.15f;
@@ -29,13 +31,15 @@ public class TileSwingView extends JPanel implements TileView, PropertyChangeLis
 
     private BasicStroke gridStroke;
     private BasicStroke pathStroke;
-    private Tile model;
+    private FlowGame game;
+    private FlowGameTile model;
 
-    public Tile getModel() {
+    public FlowGameTile getModel() {
         return model;
     }
 
-    public TileSwingView(Tile model) {
+    public TileGUIView(FlowGame game, FlowGameTile model) {
+        this.game = game;
         this.model = model;
         this.setPreferredSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
         this.model.addPropertyChangeListener(this);
@@ -63,7 +67,8 @@ public class TileSwingView extends JPanel implements TileView, PropertyChangeLis
         g.setColor(COLORS[0]);
         g.drawRect(0, 0, width, height);
 
-        int index = model.hasPath() ? model.getGamePath().get(0).getValue() : 0;
+        List<FlowGameTile> path = game.getGamePath(model);
+        int index = path == null ? 0 : path.getFirst().getValue();
         g.setColor(COLORS[index]);
         g2d.setStroke(pathStroke);
         switch (model.getPath()) {
@@ -143,7 +148,7 @@ public class TileSwingView extends JPanel implements TileView, PropertyChangeLis
                 (int) (height * size));
     }
 
-    public Tile getmodel() {
+    public FlowGameTile getmodel() {
         return model;
     }
 }
