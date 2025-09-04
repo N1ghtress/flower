@@ -44,10 +44,10 @@ public class QuadGrid extends Grid {
     @Override
     public FlowGameTile getTile(FlowGameTile t, Direction d) {
         return switch (d) {
-            case Direction.LEFT -> getTile(getX(t) + 4 % xSize, getY(t));
-            case Direction.RIGHT -> getTile(getX(t) + 1 % xSize, getY(t));
-            case Direction.UP -> getTile(getX(t), getY(t) + 4 % ySize);
-            case Direction.DOWN -> getTile(getX(t), getY(t) + 1 % ySize);
+            case Direction.LEFT -> getTile((getX(t) + 4) % xSize, getY(t));
+            case Direction.RIGHT -> getTile((getX(t) + 1) % xSize, getY(t));
+            case Direction.UP -> getTile(getX(t), (getY(t) + 4) % ySize);
+            case Direction.DOWN -> getTile(getX(t), (getY(t) + 1) % ySize);
             default -> null;
         };
     }
