@@ -61,7 +61,11 @@ public class TileGUIView extends JPanel implements TileView, PropertyChangeListe
         int width = getWidth();
         int height = getHeight();
 
-        g2d.setStroke(gridStroke);
+        if (model.isCurrent()) {
+            g2d.setStroke(pathStroke);
+        } else {
+            g2d.setStroke(gridStroke);
+        }
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, height);
         g.setColor(COLORS[0]);

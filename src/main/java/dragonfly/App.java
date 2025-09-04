@@ -10,7 +10,6 @@ import dragonfly.gui.FlowGameGUI;
  */
 public class App {
     public static void main(String[] args) {
-
         FlowGame model = new FlowGame("./levels/level1.flw");
         FlowGameGUI view = new FlowGameGUI(model);
         FlowGameController controller = new FlowGameMouse(model, view);

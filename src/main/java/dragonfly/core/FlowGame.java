@@ -16,10 +16,7 @@ public class FlowGame {
     private Grid tiles;
     private List<List<FlowGameTile>> paths;
     private List<FlowGameTile> path;
-
-    public Grid getTiles() {
-        return tiles;
-    }
+    private FlowGameTile current;
 
     public FlowGame(int xSize, int ySize) {
         this.tiles = new QuadGrid(xSize, ySize);
@@ -76,6 +73,21 @@ public class FlowGame {
         }
     }
 
+    public FlowGameTile getCurrent() {
+        return current;
+    }
+
+    public void setCurrent(FlowGameTile current) {
+        if (this.current != null)
+            this.current.setCurrent(false);
+        this.current = current;
+        this.current.setCurrent(true);
+    }
+
+    public Grid getTiles() {
+        return tiles;
+    }
+
     public boolean hasPath(FlowGameTile t) {
         return paths.stream()
                 .flatMap(Collection::stream)
@@ -129,6 +141,7 @@ public class FlowGame {
     }
 
     public void enter(FlowGameTile next) {
+        this.setCurrent(next);
         if (path.size() == 0)
             return;
 

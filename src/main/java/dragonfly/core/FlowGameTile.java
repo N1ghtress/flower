@@ -4,15 +4,27 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 public abstract class FlowGameTile {
-    protected PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    protected FlowGame game;
+    protected final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    protected final FlowGame game;
     private Path path;
+    private boolean current;
     protected int value;
 
     public FlowGameTile(FlowGame game, Path p, int value) {
         this.game = game;
         this.path = p;
         this.value = value;
+        this.current = false;
+    }
+
+    public boolean isCurrent() {
+        return current;
+    }
+
+    public void setCurrent(boolean current) {
+        boolean previous = this.current;
+        this.current = current;
+        pcs.firePropertyChange("current", previous, current);
     }
 
     public Path getPath() {
@@ -69,11 +81,13 @@ public abstract class FlowGameTile {
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        pcs.addPropertyChangeListener(listener);
+        pcs.addPropertyChangeListener("path", listener);
+        pcs.addPropertyChangeListener("current", listener);
     }
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        pcs.removePropertyChangeListener(listener);
+        pcs.removePropertyChangeListener("path", listener);
+        pcs.removePropertyChangeListener("current", listener);
     }
 
     public String toString() {
