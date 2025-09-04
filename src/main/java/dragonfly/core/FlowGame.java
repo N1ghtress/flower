@@ -31,6 +31,7 @@ public class FlowGame {
 
         this.tiles.set(0, new FlowGameSymbolTile(this, 1));
         this.tiles.set(this.tiles.size() - 1, new FlowGameSymbolTile(this, 1));
+        setCurrent(this.tiles.getFirst());
     }
 
     public FlowGame(String filepath) {
@@ -71,6 +72,15 @@ public class FlowGame {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        setCurrent(this.tiles.getFirst());
+    }
+
+    public List<List<FlowGameTile>> getPaths() {
+        return paths;
+    }
+
+    public List<FlowGameTile> getPath() {
+        return path;
     }
 
     public FlowGameTile getCurrent() {
